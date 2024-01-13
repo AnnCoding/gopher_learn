@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -18,8 +19,13 @@ func main() {
 	//
 	//test6()
 	//test7()
-	test8()
+	//test8()
 	//test9()
+
+	//test11()
+
+	test12()
+
 }
 
 // 变量
@@ -206,4 +212,50 @@ func (u user) ToString() string { // 为user类型定义一个方法
 // 接口
 type Pringer interface { //定义接口类型
 	ToString() string //只定义方法，不定义成员变量
+}
+
+// 并发
+func task10(id int) {
+
+	for id := 0; id < 10; id++ {
+		println(id)
+		time.Sleep(time.Second)
+	}
+}
+
+func test11() {
+	go task10(1) //启动goroutine
+	go task10(2)
+
+	time.Sleep(time.Second * 5)
+}
+
+// 通道 : channel 与 goroutine 搭配使用， 实现用通信代替内存共享的 CSP 模型
+
+func consumer(data chan int, done chan bool) {
+	for x := range data { //接收数据，直到通道被关闭
+		println("recv:", x)
+	}
+
+	done <- true //通知main，消费结束
+}
+
+func producer(data chan int) {
+	for i := 0; i < 4; i++ {
+		data <- i //发送数据
+	}
+
+	close(data) //生产结束，关闭通道)  {
+
+}
+func test12() {
+
+	done := make(chan bool) //用于接收消费结束信号
+	data := make(chan int)  //数据管道
+
+	go consumer(data, done) //启动消费者
+	go producer(data)       //启动生产者
+
+	<-done //阻塞，直到消费者发回结束信号
+
 }
